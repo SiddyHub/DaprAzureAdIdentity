@@ -1,0 +1,28 @@
+﻿{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:61409",
+      "sslPort": 44368
+    }
+  },
+  "profiles": {
+    "GloboTicket.Services.Marketing": {
+      "commandName": "Project",
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:5008"
+    },
+    "dapr-self-hosted": {
+        "commandName": "Executable",
+        "executablePath": "C:\\dapr\\dapr.exe",
+        "commandLineArgs": "run --app-id marketing --app-port 5008 --dapr-http-port 3508 --components-path ./AzComponents dotnet run",
+        "workingDirectory": "path to GloboTicket.Services.Marketing",
+        "nativeDebugging": true
+    }
+  }
+}
