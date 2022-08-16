@@ -1,0 +1,24 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: oauth2
+spec:
+  type: middleware.http.oauth2
+  version: v1
+  metadata:
+  - name: clientId
+    value: "<your client ID>"
+  - name: clientSecret
+    value: "<your client secret>"
+  - name: scopes
+    value: "user.read"
+  - name: authURL
+    value: "https://login.microsoftonline.com/{tenant}/oauth2/authorize"
+  - name: tokenURL
+    value: "https://login.microsoftonline.com/{tenant}/oauth2/token"
+  - name: redirectURL
+    value: "http://dummy.com"
+  - name: authHeaderName
+    value: "authorization"
+  - name: forceHTTPS
+    value: "false"

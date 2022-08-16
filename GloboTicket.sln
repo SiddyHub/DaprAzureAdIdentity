@@ -40,11 +40,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AzComponents", "AzComponent
 		AzComponents\config.yaml = AzComponents\config.yaml
 		AzComponents\cron.yaml = AzComponents\cron.yaml
 		AzComponents\email.yaml = AzComponents\email.yaml
+		oauth.yaml = oauth.yaml
 		AzComponents\pubsub.yaml = AzComponents\pubsub.yaml
 		AzComponents\secrets.json = AzComponents\secrets.json
 		AzComponents\secretstore.yaml = AzComponents\secretstore.yaml
 		AzComponents\statestore.yaml = AzComponents\statestore.yaml
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configurations", "Configurations", "{7A57111B-BB1E-4AD3-A17B-EF3C6AB5C37E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

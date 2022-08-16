@@ -103,6 +103,7 @@
             "httpPort": 3500,
 			"grpcPort": 35000,
             "metricsPort": 9090,
+            "appSsl": true,
             "componentsPath": "./AzComponents",
             "config": "./AzComponents/config.yaml",
 			"label": "daprd-debug-frontend",
