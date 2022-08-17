@@ -7,6 +7,6 @@ spec:
   version: v1
   metadata:
   - name: issuerURL
-    value: "https://login.microsoftonline.com/<Tenant-ID>/v2.0"
+    value: "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0"
   - name: clientID
-    value: "<Client-ID>"
+    value: "4c8d70d1-4171-4ddb-9712-86b33031639e"
