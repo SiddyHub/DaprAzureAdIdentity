@@ -37,6 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AzComponents", "AzComponents", "{F4554F04-02E2-410A-ABD0-1F793100F92B}"
 	ProjectSection(SolutionItems) = preProject
+		catalogBearer.yaml = catalogBearer.yaml
 		AzComponents\config.yaml = AzComponents\config.yaml
 		AzComponents\cron.yaml = AzComponents\cron.yaml
 		AzComponents\email.yaml = AzComponents\email.yaml
@@ -48,6 +49,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AzComponents", "AzComponent
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configurations", "Configurations", "{7A57111B-BB1E-4AD3-A17B-EF3C6AB5C37E}"
+	ProjectSection(SolutionItems) = preProject
+		catalogConfig.yaml = catalogConfig.yaml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
