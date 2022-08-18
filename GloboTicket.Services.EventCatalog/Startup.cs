@@ -1,8 +1,11 @@
 using AutoMapper;
 using GloboTicket.Services.EventCatalog.DbContexts;
 using GloboTicket.Services.EventCatalog.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,9 +36,14 @@ namespace GloboTicket.Services.EventCatalog
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IEventRepository, EventRepository>();
 
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());            
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            services.AddControllers().AddDapr(builder =>
+            var requireAuthenticatedUserPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+
+            services.AddControllers(configure => 
+            {
+                configure.Filters.Add(new AuthorizeFilter(requireAuthenticatedUserPolicy));
+            }).AddDapr(builder =>
                 builder.UseJsonSerializationOptions(
                     new JsonSerializerOptions()
                     {
@@ -47,6 +55,17 @@ namespace GloboTicket.Services.EventCatalog
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "EventDto Catalog API", Version = "v1" });
             });
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.Authority = "https://login.microsoftonline.com/{guid}/v2.0";
+                    options.Audience = "api://catalog";
+
+                    //options.TokenValidationParameters.ValidateIssuer = false;
+                    // rather than above approach we can use below approach and mention issuer as in access token
+                    options.TokenValidationParameters.ValidIssuer = "https://sts.windows.net/{guid}/";
+                });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -67,6 +86,8 @@ namespace GloboTicket.Services.EventCatalog
             });
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

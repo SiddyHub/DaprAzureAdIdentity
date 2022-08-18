@@ -133,7 +133,7 @@
 			"appId": "catalog",
 			"appPort": 5001,
             "httpPort": 3501,
-			"grpcPort": 50001,
+			"grpcPort": 50001,            
             "metricsPort": 9091,
             "componentsPath": "./AzComponents",  
             "config": "./AzComponents/config.yaml",          
