@@ -1,7 +1,6 @@
 using AutoMapper;
 using GloboTicket.Services.EventCatalog.DbContexts;
 using GloboTicket.Services.EventCatalog.Repositories;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Text.Json;
@@ -38,12 +38,18 @@ namespace GloboTicket.Services.EventCatalog
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            var requireAuthenticatedUserPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+            var requireAuthenticatedUserPolicy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build();
 
-            services.AddControllers(configure => 
+            // Adds Microsoft Identity platform (AAD v2.0) support to protect this Api
+            services.AddMicrosoftIdentityWebApiAuthentication(Configuration);
+
+            services.AddControllers(configure =>
             {
                 configure.Filters.Add(new AuthorizeFilter(requireAuthenticatedUserPolicy));
-            }).AddDapr(builder =>
+            })
+            .AddDapr(builder =>
                 builder.UseJsonSerializationOptions(
                     new JsonSerializerOptions()
                     {
@@ -54,18 +60,7 @@ namespace GloboTicket.Services.EventCatalog
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "EventDto Catalog API", Version = "v1" });
-            });
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer("Bearer", options =>
-                {
-                    options.Authority = "https://login.microsoftonline.com/{guid}/v2.0";
-                    options.Audience = "api://catalog";
-
-                    //options.TokenValidationParameters.ValidateIssuer = false;
-                    // rather than above approach we can use below approach and mention issuer as in access token
-                    options.TokenValidationParameters.ValidIssuer = "https://sts.windows.net/{guid}/";
-                });
+            });            
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -75,7 +70,7 @@ namespace GloboTicket.Services.EventCatalog
                 app.UseDeveloperExceptionPage();
             }
 
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
 
             app.UseSwagger();
 

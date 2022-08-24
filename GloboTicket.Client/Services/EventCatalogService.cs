@@ -1,49 +1,66 @@
 ﻿using GloboTicket.Web.Extensions;
 using GloboTicket.Web.Models.Api;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Identity.Web;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace GloboTicket.Web.Services
 {
     public class EventCatalogService : IEventCatalogService
     {
-        private readonly HttpClient client;
+        private readonly HttpClient _httpClient;        
+        private readonly ITokenAcquisition _tokenAcquisition;
 
-        public EventCatalogService(HttpClient client)
+        public EventCatalogService(ITokenAcquisition tokenAcquisition, HttpClient httpClient)
         {
-            this.client = client;
+            _tokenAcquisition = tokenAcquisition;
+            _httpClient = httpClient;            
         }
 
         public async Task<IEnumerable<Event>> GetAll()
         {
-            var response = await client.GetAsync("/api/events");
+            await PrepareAuthenticatedClient();            
+            var response = await _httpClient.GetAsync($"{_httpClient.BaseAddress}/api/events");
             return await response.ReadContentAs<List<Event>>();
         }
 
         public async Task<IEnumerable<Event>> GetByCategoryId(Guid categoryid)
         {
-            var response = await client.GetAsync($"/api/events/?categoryId={categoryid}");
+            await PrepareAuthenticatedClient();            
+            var response = await _httpClient.GetAsync($"{_httpClient.BaseAddress}/api/events/?categoryId={categoryid}");
             return await response.ReadContentAs<List<Event>>();
         }
 
         public async Task<Event> GetEvent(Guid id)
         {
-            var response = await client.GetAsync($"/api/events/{id}");
+            await PrepareAuthenticatedClient();            
+            var response = await _httpClient.GetAsync($"{_httpClient.BaseAddress}/api/events/{id}");
             return await response.ReadContentAs<Event>();
         }
 
         public async Task<IEnumerable<Category>> GetCategories()
         {
-            var response = await client.GetAsync("/api/categories");
+            await PrepareAuthenticatedClient();            
+            var response = await _httpClient.GetAsync($"{_httpClient.BaseAddress}/api/categories");
             return await response.ReadContentAs<List<Category>>();
         }
 
         public async Task<PriceUpdate> UpdatePrice(PriceUpdate priceUpdate)
         {
-            var response = await client.PostAsJson($"api/events/eventpriceupdate", priceUpdate);
+            await PrepareAuthenticatedClient();            
+            var response = await _httpClient.PostAsJson($"{_httpClient.BaseAddress}/api/events/eventpriceupdate", priceUpdate);
             return await response.ReadContentAs<PriceUpdate>();
+        }
+
+        private async Task PrepareAuthenticatedClient()
+        {          
+            var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(new List<string>());            
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
     }
 }
