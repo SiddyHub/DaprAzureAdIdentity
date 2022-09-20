@@ -1,5 +1,6 @@
 ﻿using GloboTicket.Web.Extensions;
 using GloboTicket.Web.Models.Api;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Web;
 using System;
@@ -11,20 +12,22 @@ using System.Threading.Tasks;
 namespace GloboTicket.Web.Services
 {
     public class EventCatalogService : IEventCatalogService
-    {
-        private readonly HttpClient _httpClient;        
-        private readonly ITokenAcquisition _tokenAcquisition;
+    {        
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _config;        
+        private readonly ITokenAcquisition _tokenAcquisition;        
 
-        public EventCatalogService(ITokenAcquisition tokenAcquisition, HttpClient httpClient)
-        {
+        public EventCatalogService(ITokenAcquisition tokenAcquisition, HttpClient httpClient, IConfiguration config)
+        {            
             _tokenAcquisition = tokenAcquisition;
-            _httpClient = httpClient;            
+            _httpClient = httpClient;
+            _config = config;                      
         }
 
         public async Task<IEnumerable<Event>> GetAll()
         {
-            await PrepareAuthenticatedClient();            
-            var response = await _httpClient.GetAsync($"{_httpClient.BaseAddress}/api/events");
+            await PrepareAuthenticatedClient();
+            var response = await _httpClient.GetAsync($"{_httpClient.BaseAddress}/api/events");            
             return await response.ReadContentAs<List<Event>>();
         }
 
@@ -44,8 +47,8 @@ namespace GloboTicket.Web.Services
 
         public async Task<IEnumerable<Category>> GetCategories()
         {
-            await PrepareAuthenticatedClient();            
-            var response = await _httpClient.GetAsync($"{_httpClient.BaseAddress}/api/categories");
+            await PrepareAuthenticatedClient();
+            var response = await _httpClient.GetAsync($"{_httpClient.BaseAddress}/api/categories");            
             return await response.ReadContentAs<List<Category>>();
         }
 
@@ -57,8 +60,9 @@ namespace GloboTicket.Web.Services
         }
 
         private async Task PrepareAuthenticatedClient()
-        {          
-            var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(new List<string>());            
+        {
+            var scopes = _config.GetSection("EventCatalog:EventCatalogScopes").Get<string>().Split(" ", System.StringSplitOptions.RemoveEmptyEntries);
+            var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(scopes);
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
