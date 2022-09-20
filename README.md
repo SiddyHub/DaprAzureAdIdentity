@@ -2,7 +2,7 @@
 
   Welcome to the Part 3 of the [Dapr Series](https://github.com/SiddyHub/Dapr/tree/eshop_daprized).
   
-  This sample demonstrates how our FrontEnd ASP.NET Core Web App calling a Event Catalog ASP.NET Core Web API that is secured using Azure AD.
+  This sample demonstrates our Front End ASP.NET Core Web App calling a Event Catalog ASP.NET Core Web API that is secured using Azure AD.
 
   The [main](https://github.com/SiddyHub/DaprAzureAdIdentity) branch, is the code base from [Part 2](https://github.com/SiddyHub/DaprDataManagement/tree/daprDataManagement) of the [Dapr Series](https://github.com/SiddyHub/Dapr/tree/eshop_daprized),
 and [daprAzureAdIdentity](https://github.com/SiddyHub/DaprAzureAdIdentity/tree/daprAzureAdIdentity) branch is the refactored code base that uses the Microsoft identity platform to sign in users.
@@ -22,6 +22,12 @@ This version of the code uses **Dapr 1.7**
 - A user account in your **Azure AD** tenant. This sample will not work with a **personal Microsoft account**. If you're signed in to the [Azure portal](https://portal.azure.com/) with a personal Microsoft account and have not created a user account in your directory before, you will need to create one before proceeding.
 
 ## Architecture Overview
+   
+   1. Our Front End client ASP.NET Core Web App uses the [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) to sign-in a user and obtain a JWT Access Token from Azure AD.
+   2. The access token is used as a bearer token to authorize the user to call the ASP.NET Core Web API protected by Azure AD.
+   3. The service uses the [Microsoft.Identity.Web](https://aka.ms/microsoft-identity-web) to protect the Web api, check permissions and validate tokens.
+      
+   If need more information of our scenario, please do go through this [overview](https://learn.microsoft.com/en-us/azure/active-directory/develop/scenario-web-app-call-api-overview?view=aspnetcore-6.0).
 
 ## Setup the sample
 
@@ -34,19 +40,22 @@ This version of the code uses **Dapr 1.7**
        
        To register these projects, follow the Step 1 in [this quickstart](https://learn.microsoft.com/en-us/azure/active-directory/develop/web-app-quickstart?view=aspnetcore-6.0&pivots=devlang-aspnet-core#register-and-download-your-quickstart-application).
 
-       *When registering Frontend project set the Redirect URI as `https://localhost:5000/signin-oidc` and for Front-channel logout URL, enter https://localhost:5000/signout-oidc. Also "ID Token" can be Unchecked under Authentication.
+       *When registering Frontend project set the Redirect URI as https://localhost:5000/signin-oidc and for Front-channel logout URL, enter https://localhost:5000/signout-oidc. 
+       Also "ID Token" can be Unchecked under Authentication tab.
 
      - Step 2: Code Configurations
        
-       After app registration is done, we need to make code changes to register the ID values generated in our `appsettings.json` and `Startup.cs` files for both projects .
+       After app registration is done, we need to make code changes in our `appsettings.json` file for both projects with the ID values generated.
 
-       Follow [this link](https://learn.microsoft.com/en-us/azure/active-directory/develop/scenario-web-app-call-api-app-configuration?view=aspnetcore-6.0&tabs=aspnetcore#client-secrets-or-client-certificates) to understand more how to make specific code changes.
+       Follow [this link](https://learn.microsoft.com/en-us/azure/active-directory/develop/scenario-web-app-call-api-app-configuration?view=aspnetcore-6.0&tabs=aspnetcore#client-secrets-or-client-certificates) to understand more how to make specific code changes in our `Startup.cs` and `appsettings.json`.
 
-       To acquire a token, to access our Event Catalog service, changes are made in `EventCatalogController.cs` and `EventCatalogService.cs` of the GloboTicket.Web project.
+       To acquire a token, to access our Event Catalog service, changes are made in `EventCatalogController.cs` and `EventCatalogService.cs` of the **GloboTicket.Web project**.
 
-       Please follow [acquire token link](https://learn.microsoft.com/en-us/azure/active-directory/develop/scenario-web-app-call-api-acquire-token?view=aspnetcore-6.0&tabs=aspnetcore) and [Call Web API link] to understand more on how to acquire tokens and call a Web API.
+       Please follow [acquire token link](https://learn.microsoft.com/en-us/azure/active-directory/develop/scenario-web-app-call-api-acquire-token?view=aspnetcore-6.0&tabs=aspnetcore) and [Call Web API link](https://learn.microsoft.com/en-us/azure/active-directory/develop/scenario-web-app-call-api-call-api?view=aspnetcore-6.0&tabs=aspnetcore#option-3-call-a-downstream-web-api-without-the-helper-class) to understand more on how to acquire tokens and call a Web API.
 
-       To protect our Web API further, we can add Scopes in our Event Controller API. This protection ensures that the API is called only by Applications on behalf of users who have the right scopes and roles.
+       To protect our Web API further, we can add Scopes in our Event Catalog Controller API. This protection ensures that the API is called only by Applications on behalf of users who have the right scopes and roles.
+       
+       Example:
 
        ```
        [HttpGet]
@@ -54,8 +63,7 @@ This version of the code uses **Dapr 1.7**
         public async Task<ActionResult<IEnumerable<Models.EventDto>>> Get(
             [FromQuery] Guid categoryId)
         {
-            var result = await eventRepository.GetEvents(categoryId);
-            return Ok(mapper.Map<List<Models.EventDto>>(result));
+            ...ommited...
         }
        ```
 
@@ -69,8 +77,10 @@ This version of the code uses **Dapr 1.7**
        For Frontend, the code changes remain the same , as explained in Part 1.
 
        For Event Catalog API, following code changes to be made:
+       
+       - The `AzureAd` section can be removed from `appsettings.json` file and we can comment line `services.AddMicrosoftIdentityWebApiAuthentication(Configuration);` in  `Startup.cs` file (from  **_GloboTicket.Services.EventCatalog_** project)
 
-       - Create a Dapr Bearer middleware component file, with Client ID to be filled from the App Registration done in Step 1 for Event Catalog project.
+       - Create a Dapr Bearer middleware component file under **_AzComponents_**, with Client ID to be filled from the App Registration done in Step 1 for Event Catalog project, and put appropriate 'Tenant-ID'
 
          ```
          apiVersion: dapr.io/v1alpha1
@@ -87,7 +97,7 @@ This version of the code uses **Dapr 1.7**
              value: "<Client-ID>"
          ```
 
-       - Create new config file say "catalogConfig.yml", registering the http pipeline handler.
+       - Create new config file say "catalogConfig.yml" under **_AzComponents_** folder like following:
          
          ```
          apiVersion: dapr.io/v1alpha1
@@ -106,11 +116,11 @@ This version of the code uses **Dapr 1.7**
              - name: catalog-bearer-token
                type: middleware.http.bearer
          ```
-         *Note - You may need a new Zipkin endpoint, as it is already used in our main `config.yml`. You can still run the code as is, but you may see Zipkin warnings in VS Code debug tab.
+         *Note - You may need a new Zipkin endpoint, as it is already used in our main `config.yml`. You can still run the code as is, but you may see Zipkin warnings in VS Code debug tab only for Event Catalog service.
 
        - In our `tasks.json`, replace "config" path value for catalog app-id, like following:
 
-         `"config": "./Configurations/catalogConfig.yaml"`
+         `"config": "./AzComponents/catalogConfig.yaml"`
           
    The bearer middleware helps you to make the Dapr API a protected resource where all clients should provide a bearer token in the Authorization header of the request. 
    Then before further processing the request, Dapr will check with the Identity Provider whether this bearer token is valid.
@@ -132,7 +142,7 @@ This version of the code uses **Dapr 1.7**
 
 ![callstack](https://user-images.githubusercontent.com/84964657/190982330-5724fbae-2caa-49ec-a87a-db425db661c5.jpg)
 
-   Once the application and side car is running, navigate to address `*https://localhost:5000*` in your preferred browser, to access the application.
+   Once the application and side car is running, navigate to address **https://localhost:5000** in your preferred browser, to access the application.
 
    You're prompted for your credentials, and then asked to consent to the permissions that your app requires. Select Accept on the consent prompt.
 
@@ -145,3 +155,15 @@ This version of the code uses **Dapr 1.7**
    The Darp extension added also provides information about the applications running and the corresponding components loaded for that application.
 
    ![dapr_extension_components](https://user-images.githubusercontent.com/84964657/190985678-5b7d24c8-095d-43e5-86fe-0002a5d985ee.png)   
+   
+## Troubleshooting notes
+
+- If not able to load Dapr projects when running from VS Code, check if Docker Engine is running, so that it can load all components.
+- Make sure the Azure AD placeholder values are filled in `appsettings.json` file for Front end and Event Catalog project, after Azure AD App Registration is done.
+  
+  (If following Part 2, make the `appsettings.json` changes only for Front End project)
+- If using Azure Service Bus as a Pub Sub Message broker make sure to enter primary connection string value for **"servicebus"** key in `secrets.json`
+- If using Cosmos DB make sure to enter Endpoint and Key in `secrets.json` file **"CosmosDb"** section.
+- If using Azure Redis Cache make sure to enter Key in `secrets.json` file **"redis"** section.
+- If mail binding is not working, make sure `maildev`image is running. Refer [this link](https://github.com/maildev/maildev) for more info.
+- For any more service issues, we can check Zipkin trace logs.   
