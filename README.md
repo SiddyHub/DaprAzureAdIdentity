@@ -38,10 +38,15 @@ This version of the code uses **Dapr 1.7**
        
        Since we would be demonstrating our FrontEnd signing-in a user and calling an Event Catalog Web API that is secured with Azure AD, so for these two projects, each needs to be separately registered in your Azure AD tenant. 
        
-       To register these projects, follow the Step 1 in [this quickstart](https://learn.microsoft.com/en-us/azure/active-directory/develop/web-app-quickstart?view=aspnetcore-6.0&pivots=devlang-aspnet-core#register-and-download-your-quickstart-application).
-
+       To Register our Front End Client project, follow the steps as mentioned in [this quickstart](https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app#register-an-application).
+       
        *When registering Frontend project set the Redirect URI as https://localhost:5000/signin-oidc and for Front-channel logout URL, enter https://localhost:5000/signout-oidc. 
        Also "ID Token" can be Unchecked under Authentication tab.
+       
+       To Register our Event Catalog API and Add a Scope, please follow sections "Register the Web API" and "Add a Scope" described in [this link](https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app#register-an-application).
+       
+       For our Front End to call Event Catalog API on behalf of the signed in user, they must request delegated permissions.
+       For details please check out how to [Add permissions to access your Web API](https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis#add-permissions-to-access-your-web-api).       
 
      - Step 2: Code Configurations
        
@@ -74,7 +79,7 @@ This version of the code uses **Dapr 1.7**
 
      - Step 2: Code Configurations
 
-       For Frontend, the code changes remain the same , as explained in Part 1.
+       For Frontend, the code changes remain the same , as explained in Part 1, Step 2.
 
        For Event Catalog API, following code changes to be made:
        
@@ -159,9 +164,10 @@ This version of the code uses **Dapr 1.7**
 ## Troubleshooting notes
 
 - If not able to load Dapr projects when running from VS Code, check if Docker Engine is running, so that it can load all components.
-- Make sure the Azure AD placeholder values are filled in `appsettings.json` file for Front end and Event Catalog project, after Azure AD App Registration is done.
+- Make sure the **Azure AD** and **EventCatalogScopes** placeholder values are filled in `appsettings.json` file for Front End Client and **Azure AD** placeholder values for Event Catalog project, after Azure AD App Registration is done.
   
   (If following Part 2, make the `appsettings.json` changes only for Front End project)
+- When registering Front End Client in Azure AD, make sure Delegated Permissions are added for Event Catalog in API Permissions.
 - If using Azure Service Bus as a Pub Sub Message broker make sure to enter primary connection string value for **"servicebus"** key in `secrets.json`
 - If using Cosmos DB make sure to enter Endpoint and Key in `secrets.json` file **"CosmosDb"** section.
 - If using Azure Redis Cache make sure to enter Key in `secrets.json` file **"redis"** section.
