@@ -6,6 +6,7 @@ using GloboTicket.Web.Models.Api;
 using GloboTicket.Web.Models.View;
 using GloboTicket.Web.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Web;
 
 namespace GloboTicket.Web.Controllers
 {
@@ -22,6 +23,7 @@ namespace GloboTicket.Web.Controllers
             this.settings = settings;
         }
 
+        [AuthorizeForScopes(ScopeKeySection = "EventCatalog:EventCatalogScopes")]
         public async Task<IActionResult> Index(Guid categoryId)
         {
             var currentBasketId = Request.Cookies.GetCurrentBasketId(settings);

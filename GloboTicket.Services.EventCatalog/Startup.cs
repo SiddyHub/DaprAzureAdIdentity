@@ -37,12 +37,12 @@ namespace GloboTicket.Services.EventCatalog
             services.AddScoped<IEventRepository, EventRepository>();
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
+            
             var requireAuthenticatedUserPolicy = new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
                 .Build();
 
-            // Adds Microsoft Identity platform (AAD v2.0) support to protect this Api
+            // Adds Microsoft Identity platform(AAD v2.0) support to protect this Api
             services.AddMicrosoftIdentityWebApiAuthentication(Configuration);
 
             services.AddControllers(configure =>
@@ -55,7 +55,7 @@ namespace GloboTicket.Services.EventCatalog
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                         PropertyNameCaseInsensitive = true,
-                    }));
+                    }));                  
 
             services.AddSwaggerGen(c =>
             {
@@ -70,7 +70,7 @@ namespace GloboTicket.Services.EventCatalog
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseSwagger();
 

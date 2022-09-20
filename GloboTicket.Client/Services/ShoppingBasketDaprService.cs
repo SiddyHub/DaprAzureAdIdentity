@@ -2,12 +2,12 @@
 using GloboTicket.Web.Messages;
 using GloboTicket.Web.Models;
 using GloboTicket.Web.Models.Api;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace GloboTicket.Web.Services
@@ -15,17 +15,17 @@ namespace GloboTicket.Web.Services
     public class ShoppingBasketDaprService : IShoppingBasketService
     {
         private readonly DaprClient daprClient;
-        private readonly Settings settings;
+        private readonly IHttpContextAccessor httpContextAccessor;
         private readonly ILogger<ShoppingBasketDaprService> logger;
         private readonly IEventCatalogService eventCatalogService;
         private const string stateStoreName = "shopstate";
 
-        public ShoppingBasketDaprService(DaprClient daprClient, Settings settings, 
+        public ShoppingBasketDaprService(DaprClient daprClient, IHttpContextAccessor httpContextAccessor, 
             ILogger<ShoppingBasketDaprService> logger,
             IEventCatalogService eventCatalogService)
         {
             this.daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
-            this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            this.httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.eventCatalogService = eventCatalogService ?? throw new ArgumentNullException(nameof(eventCatalogService));
         }
@@ -127,7 +127,7 @@ namespace GloboTicket.Web.Services
                 if (basketId == Guid.Empty) basketId = Guid.NewGuid();                
                 basket = new StateStoreBasket();
                 basket.BasketId = basketId;
-                basket.UserId = settings.UserId;
+                basket.UserId = Guid.Parse(httpContextAccessor.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
                 basket.Lines = new List<BasketLine>();                
                 await SaveBasketToStateStore(basket);
             }

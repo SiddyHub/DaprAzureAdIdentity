@@ -19,7 +19,8 @@ namespace GloboTicket.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var orders = await orderService.GetOrdersForUser(settings.UserId);
+            var orders = await orderService.GetOrdersForUser(
+                System.Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value));
 
             return View(new OrderViewModel { Orders = orders });
         }

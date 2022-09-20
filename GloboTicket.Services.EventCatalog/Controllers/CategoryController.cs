@@ -2,6 +2,7 @@
 using GloboTicket.Services.EventCatalog.Models;
 using GloboTicket.Services.EventCatalog.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Web.Resource;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -20,6 +21,7 @@ namespace GloboTicket.Services.EventCatalog.Controllers
         }
 
         [HttpGet]
+        [RequiredScope(new string[] { "Catalog.FullAccess" })]
         public async Task<ActionResult<IEnumerable<CategoryDto>>> Get()
         {
             var result = await _categoryRepository.GetAllCategories();

@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Dapr.Client;
-using GloboTicket.Services.EventCatalog.Messages;
 using GloboTicket.Services.EventCatalog.Models;
 using GloboTicket.Services.EventCatalog.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Web.Resource;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,17 +15,16 @@ namespace GloboTicket.Services.EventCatalog.Controllers
     public class EventController : ControllerBase
     {
         private readonly IEventRepository eventRepository;
-        private readonly IMapper mapper;
-        private readonly DaprClient daprClient;
+        private readonly IMapper mapper;        
 
-        public EventController(IEventRepository eventRepository, IMapper mapper, Dapr.Client.DaprClient daprClient)
+        public EventController(IEventRepository eventRepository, IMapper mapper)
         {
             this.eventRepository = eventRepository;
-            this.mapper = mapper;
-            this.daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
+            this.mapper = mapper;            
         }
 
         [HttpGet]
+        [RequiredScope(new string[] { "Catalog.FullAccess" })]
         public async Task<ActionResult<IEnumerable<Models.EventDto>>> Get(
             [FromQuery] Guid categoryId)
         {
@@ -46,25 +45,6 @@ namespace GloboTicket.Services.EventCatalog.Controllers
             var eventToUpdate = await eventRepository.GetEventById(priceUpdate.EventId);
             eventToUpdate.Price = priceUpdate.Price;
             await eventRepository.SaveChanges();
-
-            //send integration event on to service bus
-
-            //PriceUpdatedMessage priceUpdatedMessage = new PriceUpdatedMessage
-            //{
-            //    EventId = priceUpdate.EventId,
-            //    Price = priceUpdate.Price
-            //};
-
-            //try
-            //{                
-            //    await daprClient.PublishEventAsync("pubsub", "priceupdatedmessage", priceUpdatedMessage);
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine(e);
-            //    throw;
-            //}
-
 
             return Ok(priceUpdate);
         }

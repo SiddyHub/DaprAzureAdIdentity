@@ -14,7 +14,11 @@
                 <div class="col text-right">
                     <div class="mt-3" >
                         <a asp-controller="Order" asp-action="Index">My orders</a>
-
+                        @if(User.Identity.IsAuthenticated)
+                        {                            
+                            <span class="navbar-text">Hello @User.Identity.Name!</span>                                                     
+                            <a class="nav-link" asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignOut">Sign out</a>                           
+                        }
                     </div>
                 </div>
             </div>

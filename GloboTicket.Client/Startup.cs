@@ -29,7 +29,7 @@ namespace GloboTicket.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDistributedMemoryCache();
+            services.AddHttpContextAccessor();
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -53,9 +53,9 @@ namespace GloboTicket.Web
                 .Build();
 
             var builder = services.AddControllersWithViews(configure =>
-            {
-                configure.Filters.Add(new AuthorizeFilter(requireAuthenticatedUserPolicy));
-            }).AddMicrosoftIdentityUI();
+                {
+                    configure.Filters.Add(new AuthorizeFilter(requireAuthenticatedUserPolicy));
+                }).AddMicrosoftIdentityUI();
 
             if (environment.IsDevelopment())
                 builder.AddRazorRuntimeCompilation();
@@ -68,9 +68,9 @@ namespace GloboTicket.Web
                 PropertyNameCaseInsensitive = true,
             });
 
-            var daprPort = Environment.GetEnvironmentVariable("DAPR_HTTP_PORT");            
-            services.AddHttpClient<IEventCatalogService, EventCatalogService>(c=> 
-                c.BaseAddress = new Uri($"http://localhost:{daprPort}/v1.0/invoke/catalog/method"));
+            var daprPort = Environment.GetEnvironmentVariable("DAPR_HTTP_PORT");
+            services.AddHttpClient<IEventCatalogService, EventCatalogService>(c=>
+            c.BaseAddress = new Uri($"http://localhost:{daprPort}/v1.0/invoke/catalog/method"));
             services.AddSingleton<IOrderService>(c =>
                 new OrderService(DaprClient.CreateInvokeHttpClient("order")));
 
