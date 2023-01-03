@@ -5,9 +5,11 @@ metadata:
 auth:
   secretStore: secretstore   
 spec:
-  type: pubsub.azure.servicebus  
+  type: pubsub.azure.servicebus 
+  version: v1 
   metadata:
     - name: connectionString
       value:
       secretKeyRef: 
         name: azure:servicebus
+        key: azure:servicebus

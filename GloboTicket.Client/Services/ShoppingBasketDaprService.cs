@@ -127,7 +127,7 @@ namespace GloboTicket.Web.Services
                 if (basketId == Guid.Empty) basketId = Guid.NewGuid();                
                 basket = new StateStoreBasket();
                 basket.BasketId = basketId;
-                basket.UserId = Guid.Parse(httpContextAccessor.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+                basket.UserId = Guid.Parse(httpContextAccessor.HttpContext.User.FindFirst(c => c.Type == "uid")?.Value);
                 basket.Lines = new List<BasketLine>();                
                 await SaveBasketToStateStore(basket);
             }

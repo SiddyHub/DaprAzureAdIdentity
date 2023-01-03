@@ -15,5 +15,6 @@ spec:
     value:
     secretKeyRef: 
         name: redis:Key
+        key:  redis:Key
   - name: actorStateStore
     value: "true"
